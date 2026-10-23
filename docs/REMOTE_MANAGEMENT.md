@@ -97,7 +97,7 @@ wait-online target: SSH has bounded connection attempts and systemd retries.
 Account-scoped server keepalives retire dead tunnel workers so they cannot
 retain the assigned port indefinitely. These do not change operator-account
 policy. The actual stale-port incident and fresh-login verification are recorded
-in [Phase 2C evidence](PHASE_2C.md).
+in local Phase 2C qualification records, excluded from the public source release.
 
 Constrain each device key in the tunnel account's `authorized_keys` to its allocated listener. A reviewed entry should be equivalent to:
 
@@ -147,4 +147,4 @@ The safe migration order is:
 7. verify a new reverse-path session before committing;
 8. separately decide whether root SSH should be prohibited or key-only according to deployment policy.
 
-No step above was performed during Phase 0 or Phase 2A. Detailed operator, rotation, revocation, bastion host-key rotation, and future SSH-hardening rollback procedures are in [MANAGEMENT_RUNBOOK.md](MANAGEMENT_RUNBOOK.md).
+No step above was performed during Phase 0 or Phase 2A. Historical operational records remain local. For a new deployment, follow the public [installation guide](INSTALL.zh-CN.md); credential rotation and host-key changes require their own reviewed rollback procedure.
