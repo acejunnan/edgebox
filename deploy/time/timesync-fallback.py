@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """HTTP(S) Time Synchronization Fallback for EdgeBox N1.
-Runs when NTP is unavailable or blocked (e.g. in hotel networks).
+Runs when NTP is temporarily unavailable or blocked.
 Invariants:
 - Never sets time backwards; only steps FORWARD.
 - Requires two independent sources to agree within 5 seconds.

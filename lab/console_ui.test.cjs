@@ -27,4 +27,6 @@ test('everyday pages do not expose raw configuration or device identifier cards'
   assert.ok(app.includes('网页版本'));
   assert.ok(app.includes('updates/download'));
   assert.ok(app.includes('计划使用的节点'));
+  assert.ok(!app.includes('hotel-portal'));
+  assert.ok(!app.includes('酒店'));
 });

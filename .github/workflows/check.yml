@@ -14,10 +14,12 @@ jobs:
       - run: go vet ./...
       - run: python3 -m unittest discover -s deploy -p 'test_*.py' -v
       - run: bash -n install.sh
+      - run: python3 -m py_compile internal/setup/remote.py
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: node --test lab/console_ui.test.cjs
+      - run: node --check internal/setup/assets/app.js
       - name: Build Linux targets
         run: |
           for arch in amd64 arm64; do

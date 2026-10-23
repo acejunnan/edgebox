@@ -193,4 +193,20 @@ Full factory/previous/current runtime-configuration transactions, a signed upgra
 
 ## Public installation entry point
 
+`edge-setup` is a workstation-only Go program with a loopback browser UI.
+It accepts the VPS and LAN edge addresses, optional SSH login settings, and
+explicitly confirmed Ed25519 host identities. It pins the source commit for
+the run, provisions independent reverse SSH first, proves a fresh reverse
+login, then applies the data plane under its independent rollback timers.
+The privileged remote helper exposes fixed operations and validates operator
+SSH policy before reload. Commit requires a real VLESS client egress probe,
+unchanged main WAN routes, and another fresh management login. Credentials
+remain in process memory for the run; the UI requires a random session token,
+exact loopback Host and same-origin requests. No control service is added to
+the edge or VPS. See [wizard usage](SETUP.zh-CN.md).
+
+The appliance assumes working wired WAN at installation. Captive-portal
+assistance, its HTTP/broker actions, and temporary AP-to-WAN rules have been
+removed; the isolated management AP remains a separate optional component.
+
 The source bootstrap builds all application commands. It prepares a fresh data-plane deployment without activating it. An independent reverse SSH service is a prerequisite to edge activation. Operators exchange only public keys, stage explicit endpoint configuration, start under a systemd rollback timer, verify fresh management access and real client egress, then explicitly commit on both hosts. Existing installations are not overwritten. Web/AP/application OTA activation is separate from data-plane installation; no full-system OTA is promised. See [installation guide](INSTALL.zh-CN.md).

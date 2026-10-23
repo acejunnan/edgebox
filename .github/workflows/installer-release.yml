@@ -1,0 +1,34 @@
+name: Build installer download
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Installer release tag
+        required: true
+        default: v0.1.0-setup.1
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - run: go test ./internal/setup
+      - name: Build workstation installers
+        run: |
+          mkdir -p release
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -ldflags "-X main.sourceRef=$GITHUB_SHA" -o release/EdgeBox-Setup-Windows.exe ./cmd/edge-setup
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -trimpath -ldflags "-X main.sourceRef=$GITHUB_SHA" -o release/edgebox-setup-macos-arm64 ./cmd/edge-setup
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "-X main.sourceRef=$GITHUB_SHA" -o release/edgebox-setup-linux-amd64 ./cmd/edge-setup
+          cd release
+          sha256sum * > SHA256SUMS
+      - name: Publish installer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9A-Za-z._-]+$ ]]
+          gh release create "$RELEASE_TAG" release/* --target "$GITHUB_SHA" --title "EdgeBox 可视化安装向导" --notes "首次安装向导：填写 VPS 和小盒 IP，使用 SSH 登录，自动建立独立反向管理、配对并验证真实出口。只面向全新部署；请先阅读 README。此安装器尚未完成干净 VPS/Armbian 的完整实机验收。"

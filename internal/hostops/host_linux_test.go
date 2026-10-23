@@ -10,6 +10,9 @@ import (
 
 func TestPrivilegedBoundaryRejectsArbitraryOperations(t *testing.T) {
 	b := &Broker{}
+	if _, err := b.action(context.Background(), "hotel_portal", json.RawMessage(`{"action":"enable"}`)); err == nil {
+		t.Fatal("removed portal operation accepted")
+	}
 	for _, payload := range []string{`{"url":"http://example.org/update.zip"}`, `{"url":"https://127.0.0.1/update.zip"}`, `{"url":"https://192.168.50.1/update.zip"}`, `{"url":"https://example.org/update.zip","command":"id"}`, `{"url":"https://user:password@example.org/update.zip"}`} {
 		if _, err := b.action(context.Background(), "update_download", json.RawMessage(payload)); err == nil {
 			t.Fatal("unsafe download accepted")

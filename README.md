@@ -18,6 +18,20 @@ N1 / ARM64 Linux：独立策略路由 → nftables NAT → 住宅 WAN → Intern
 
 ## 安装入口
 
+**推荐：[下载 Windows 安装向导](https://github.com/acejunnan/edgebox/releases/latest/download/EdgeBox-Setup-Windows.exe)**，双击后自动打开本机安装窗口。
+
+窗口默认只显示 **VPS 公网 IP** 和 **小盒 IP** 两个输入框。向导优先使用本机
+`~/.ssh/id_ed25519` 或 `id_rsa` 登录；需要用户名、端口、密码或其他私钥时，展开“登录设置”。
+核对两端 SSH 指纹后点击“开始安装”，向导会自动建立反向 SSH、交换公钥、配置
+数据通道、验证客户真实出口及管理存活，成功后给出私人 VLESS 导入链接。
+第一次连接无法仅凭 IP 获得系统权限，必须已有可用的 SSH 密钥或登录密码。
+
+默认小盒插上网线后已能正常上网，**不包含酒店网页认证或热点临时直通模式**。
+电脑在首次安装时须能访问小盒的局域网 IP。向导用于全新部署，已有配置会停止安装。
+详见 [可视化向导说明](docs/SETUP.zh-CN.md)。
+
+下面的命令行入口作为高级安装方式保留：
+
 适用：Debian/Ubuntu AMD64 VPS，以及已安装 64 位 Debian/Armbian 的 N1。
 N1 裸机刷写、引导程序、磁盘分区不在安装脚本范围内。其他 ARM64 Linux 设备也可作为 edge。
 运行前阅读 **[完整安装与配对教程](docs/INSTALL.zh-CN.md)**。
@@ -42,6 +56,7 @@ curl -fsSL https://raw.githubusercontent.com/acejunnan/edgebox/main/install.sh -
 
 | 组件 | 当前作用 |
 | --- | --- |
+| `edge-setup` | 电脑上的可视化首次安装向导；本机窗口，不常驻小盒或 VPS |
 | `edge-agent` | 身份、持久状态、状态机和结构化健康的基础实现；不是完整中央控制后台 |
 | `edge-dataplane` | 两端 WireGuard 生命周期；IPv4 策略路由、NAT、限速、故障清理及恢复 |
 | `edge-management-render` | 生成独立反向 SSH 服务、固定主机密钥和堡垒机限制 |

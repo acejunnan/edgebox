@@ -169,7 +169,7 @@ func (s *Server) Handler() http.Handler {
 			jsonResponse(w, 200, snapshot)
 		}))
 	}
-	for route, action := range map[string]string{"hotspot": "hotspot", "hotel-portal": "hotel_portal", "probes": "probes", "restart": "restart", "updates/apply": "update", "updates/download": "update_download"} {
+	for route, action := range map[string]string{"hotspot": "hotspot", "probes": "probes", "restart": "restart", "updates/apply": "update", "updates/download": "update_download"} {
 		route, action := route, action
 		mux.HandleFunc("POST /api/"+route, s.protect(true, func(w http.ResponseWriter, r *http.Request, session Session) {
 			var body json.RawMessage
@@ -187,15 +187,6 @@ func (s *Server) Handler() http.Handler {
 			jsonResponse(w, 200, result)
 		}))
 	}
-	mux.HandleFunc("GET /api/hotel-portal", s.protect(false, func(w http.ResponseWriter, r *http.Request, session Session) {
-		req, _ := json.Marshal(map[string]string{"action": "status"})
-		result, err := s.Backend.Action(r.Context(), "hotel_portal", req)
-		if err != nil {
-			jsonResponse(w, 503, map[string]string{"error": "hotel_portal_unavailable"})
-			return
-		}
-		jsonResponse(w, 200, result)
-	}))
 	mux.HandleFunc("POST /api/updates/upload", s.protect(true, func(w http.ResponseWriter, r *http.Request, session Session) {
 		r.Body = http.MaxBytesReader(w, r.Body, 128<<20)
 		if err := r.ParseMultipartForm(32 << 20); err != nil {

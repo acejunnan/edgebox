@@ -214,28 +214,6 @@ func (b *Broker) action(ctx context.Context, kind string, payload json.RawMessag
 		}
 		c.Schema = 1
 		return b.changeAP(ctx, c)
-	case "hotel_portal":
-		var req struct {
-			Action   string `json:"action"`
-			Duration int    `json:"duration,omitempty"`
-		}
-		if strictDecode(payload, &req) != nil {
-			return nil, errors.New("invalid hotel portal request")
-		}
-		args := []string{"/opt/edgebox-network/hotel-portal.py", req.Action}
-		if req.Action == "enable" && req.Duration > 0 {
-			if req.Duration > 3600 {
-				req.Duration = 3600
-			}
-			args = append(args, strconv.Itoa(req.Duration))
-		}
-		out, err := command(ctx, "/usr/bin/python3", args...)
-		if err != nil {
-			return nil, err
-		}
-		var res any
-		_ = json.Unmarshal(out, &res)
-		return res, nil
 	case "update_import":
 		var req struct {
 			Source string `json:"source"`
@@ -432,11 +410,6 @@ func (b *Broker) snapshot(ctx context.Context) map[string]any {
 		_ = json.Unmarshal(dpData, &dataplaneStatus)
 	}
 
-	var hotelStatus map[string]any
-	if hmData, err := os.ReadFile("/var/lib/edgebox/hotel-mode.json"); err == nil {
-		_ = json.Unmarshal(hmData, &hotelStatus)
-	}
-
 	_, bridgeActiveErr := command(ctx, "/usr/bin/systemctl", "is-active", "--quiet", "edge-bridge.service")
 	_, mgmtAltActiveErr := command(ctx, "/usr/bin/systemctl", "is-active", "--quiet", "edge-mgmt-alt.service")
 
@@ -460,35 +433,34 @@ func (b *Broker) snapshot(ctx context.Context) map[string]any {
 		publicIP, _ = probes["public_ip"].(string)
 	}
 	return map[string]any{
-		"device_id":       readText("/var/lib/edgebox/identity/device-id"),
-		"version":         b.Engine.Status().Current,
-		"vpn_core":        map[string]any{"installed": true, "running": dpState == "ONLINE", "state": dpState, "transport": "wireguard"},
-		"dataplane":       dataplaneStatus,
-		"hotel_mode":      hotelStatus,
-		"fallbacks":       map[string]bool{"edge_bridge": bridgeActiveErr == nil, "edge_mgmt_alt": mgmtAltActiveErr == nil},
-		"hardware":        strings.TrimRight(readText("/proc/device-tree/model"), "\x00"),
-		"os":              readText("/etc/os-release"),
-		"uptime":          readText("/proc/uptime"),
-		"uptime_seconds":  uptimeSeconds(readText("/proc/uptime")),
-		"boot":            readText("/proc/sys/kernel/random/boot_id"),
-		"load":            readText("/proc/loadavg"),
-		"temperature":     temperature,
-		"memory":          total + " / available " + available,
-		"memory_usage":    memoryUsage(mem),
-		"disk_usage":      disk,
-		"storage":         fmt.Sprintf("%.2f GiB free", float64(free)/(1<<30)),
-		"ethernet":        ethernet,
-		"hotspot":         map[string]any{"ssid": ssid.SSID, "revision": ssid.Revision, "state": strings.TrimSpace(string(wifi)), "address": ap.Address},
-		"interfaces":      ifaceJSON,
-		"default_route":   routeJSON,
-		"public_ip":       publicIP,
-		"management":      map[string]any{"status": management.Status, "reason": management.ReasonCode},
-		"health":          report.Snapshot(),
-		"transport":       "wireguard+tcp_fallback",
-		"active_node":     nil,
-		"overall":         overall,
-		"last_error":      strings.Join(redacted, "\n"),
-		"probes":          probes,
+		"device_id":      readText("/var/lib/edgebox/identity/device-id"),
+		"version":        b.Engine.Status().Current,
+		"vpn_core":       map[string]any{"installed": true, "running": dpState == "ONLINE", "state": dpState, "transport": "wireguard"},
+		"dataplane":      dataplaneStatus,
+		"fallbacks":      map[string]bool{"edge_bridge": bridgeActiveErr == nil, "edge_mgmt_alt": mgmtAltActiveErr == nil},
+		"hardware":       strings.TrimRight(readText("/proc/device-tree/model"), "\x00"),
+		"os":             readText("/etc/os-release"),
+		"uptime":         readText("/proc/uptime"),
+		"uptime_seconds": uptimeSeconds(readText("/proc/uptime")),
+		"boot":           readText("/proc/sys/kernel/random/boot_id"),
+		"load":           readText("/proc/loadavg"),
+		"temperature":    temperature,
+		"memory":         total + " / available " + available,
+		"memory_usage":   memoryUsage(mem),
+		"disk_usage":     disk,
+		"storage":        fmt.Sprintf("%.2f GiB free", float64(free)/(1<<30)),
+		"ethernet":       ethernet,
+		"hotspot":        map[string]any{"ssid": ssid.SSID, "revision": ssid.Revision, "state": strings.TrimSpace(string(wifi)), "address": ap.Address},
+		"interfaces":     ifaceJSON,
+		"default_route":  routeJSON,
+		"public_ip":      publicIP,
+		"management":     map[string]any{"status": management.Status, "reason": management.ReasonCode},
+		"health":         report.Snapshot(),
+		"transport":      "wireguard+tcp_fallback",
+		"active_node":    nil,
+		"overall":        overall,
+		"last_error":     strings.Join(redacted, "\n"),
+		"probes":         probes,
 	}
 }
 func (b *Broker) probes(ctx context.Context) map[string]any {

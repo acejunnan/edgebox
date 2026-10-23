@@ -35,16 +35,12 @@ async function render(){
   try{
     if(page==='dashboard'){
       const [d,n]=await Promise.all([api('dashboard'),api('nodes')]);const grid=document.createElement('div');grid.className='cards';
-      const dp=d.dataplane||{}, fb=d.fallbacks||{}, hm=d.hotel_mode||{};
+      const dp=d.dataplane||{}, fb=d.fallbacks||{};
       const dpOnline=dp.state==='ONLINE';
       const dpText=dpOnline?(dp.transport==='wireguard'?'已接通（WireGuard 主线路）':'已接通'):(fb.edge_bridge?'TCP 备用就绪（VLESS 443）':'未连接');
       const dpDetail=dpOnline?`接口: ${dp.interface||'ebwg0'} · 带宽: ${dp.bandwidth_mbit?dp.bandwidth_mbit+' Mbps':'不限速'}`:(fb.edge_bridge?'主线路异常时自动切换 TCP 备用':'加速核心未启动');
       const fbText=(fb.edge_bridge&&fb.edge_mgmt_alt)?'TCP/443 数据与应急管理均就绪':'部分就绪';
       const fbDetail=`数据备用: ${fb.edge_bridge?'就绪 (VLESS 443)':'未就绪'} · 应急管理: ${fb.edge_mgmt_alt?'就绪 (端口 22011)':'未就绪'}`;
-      if(hm.active){
-        const remain=Math.max(0,Math.round(((hm.expires_at||0)-Date.now()/1000)/60));
-        grid.append(card('酒店认证协助模式','生效中',`热点临时直通酒店外网，约剩余 ${remain} 分钟后自动恢复防护`));
-      }
       [['网页版本',d.version],['网络加速',dpText,dpDetail],['双重备用通道',fbText,fbDetail],['当前出口 IP',d.public_ip||'尚未检测',dpOnline?'经由国内中继/加速节点出口':'可到“网络检查”页面手动检测'],['网线连接',d.ethernet==='up'?'已连接':'未连接'],['热点名称',d.hotspot?.ssid],['远程维护',d.management?.status==='healthy'?'已连接':'暂未连接','用于维护盒子，不是加速节点'],['本次开机已运行',U.duration(d.uptime_seconds),'格式：年 月 日 小时:分钟'],['CPU 温度',d.temperature||'暂时无法读取'],['内存',U.usage(d.memory_usage),d.memory_usage?`已用 ${Math.round(d.memory_usage.used_percent)}%`:''],['磁盘',U.usage(d.disk_usage),d.disk_usage?`已用 ${Math.round(d.disk_usage.used_percent)}%`:'']].forEach(f=>grid.append(card(...f)));root.append(grid);
     }else if(page==='nodes'){
       const n=await api('nodes'),node=selected(n);root.append(card('当前加速连接','尚未启用','没有正在使用的加速节点或实际连接 IP。添加节点只保存资料，不会假装已经连接。'));
@@ -55,18 +51,8 @@ async function render(){
         c.append(button(p.id===n.preferred?'重新保存为首选':'选用此节点',async()=>{await saveNodes(n,n.profiles,p.id);await render();message('已保存选择；加速功能尚未接通，不会立即连接。');}),button('修改资料',()=>nodeEditor(root,n,p)),button('删除',async()=>{if(!confirm('确定删除这个节点的资料？'))return;await saveNodes(n,n.profiles.filter(x=>x.id!==p.id),n.preferred===p.id?'':n.preferred);await render();}));root.append(c);}
       root.append(button('恢复上一次保存的节点设置',async()=>{if(!confirm('确定恢复上一次保存的节点设置？'))return;await api('nodes/rollback',{expected:n.revision});await render();}));
     }else if(page==='diagnostics'){
-      const d=await api('diagnostics'), dp=d.dataplane||{}, fb=d.fallbacks||{}, hm=d.hotel_mode||{};
+      const d=await api('diagnostics'), dp=d.dataplane||{}, fb=d.fallbacks||{};
       rows(root,[['网线连接',d.ethernet==='up'?'已连接':'未连接'],['热点名称',d.hotspot?.ssid],['网络加速',dp.state==='ONLINE'?'已接通（'+(dp.transport||'wireguard')+'）':'未接通'],['TCP 备用通道',fb.edge_bridge?'运行中 (TCP/443)':'未运行'],['应急管理备用',fb.edge_mgmt_alt?'运行中 (端口 22011)':'未运行'],['远程维护',d.management?.status==='healthy'?'已连接':'暂未连接'],['当前出口 IP',d.public_ip||'尚未检测']]);
-      const hPanel=document.createElement('div');hPanel.className='panel';
-      hPanel.innerHTML='<h2>酒店网页认证模式</h2><p>在酒店等场所插上网线后若无法上网，通常需要用手机在浏览器中完成酒店认证（如输入房号与姓氏）。开启后将临时允许热点设备直连酒店网络 10 分钟以完成登录。认证完成后会自动恢复安全隔离。</p>';
-      const remainMin=Math.max(0,Math.round(((hm.expires_at||0)-Date.now()/1000)/60));
-      hPanel.append(textNode('p',hm.active?`当前状态：已开启认证模式（约剩余 ${remainMin} 分钟）。完成认证后可提前手动关闭。`:'当前状态：已关闭（热点处于安全隔离模式）'));
-      if(!hm.active){
-        hPanel.append(button('开启酒店认证模式（10 分钟）',async()=>{await api('hotel-portal',{action:'enable',duration:600});await render();message('已开启酒店认证模式，请用手机打开任意网页完成酒店登录。');}));
-      }else{
-        hPanel.append(button('立即关闭认证模式',async()=>{await api('hotel-portal',{action:'disable'});await render();message('已恢复安全隔离模式。');}));
-      }
-      root.append(hPanel);
       const result=document.createElement('div');root.append(button('开始网络检查',async()=>{message('正在检查，请稍等……');const r=await api('probes',{});result.replaceChildren();rows(result,[['域名查询',r.dns?'正常':'未通过'],['外部网站连接',r.outbound_https?'正常':'未通过'],['维护服务器连接',r.bastion_tcp?'正常':'未通过'],['当前出口 IP',r.public_ip||'暂未获取']]);message('检查完成。');}));root.append(result);
       const a=textNode('a','下载检查报告（给维护人员）');a.href='/api/bundle';a.className='button';root.append(a);const details=document.createElement('details');details.append(textNode('summary','查看维护详情'));details.append(textNode('pre',JSON.stringify(d,null,2)));root.append(details);
     }else if(page==='settings'){
