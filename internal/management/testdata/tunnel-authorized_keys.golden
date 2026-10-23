@@ -1,0 +1,1 @@
+restrict,port-forwarding,permitlisten="127.0.0.1:22201" ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8g lab-device-a

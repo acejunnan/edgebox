@@ -1,0 +1,31 @@
+[Unit]
+Description=EdgeBox VLESS REALITY client entry through N1 only
+Wants=network.target edge-dataplane.service
+After=network.target edge-dataplane.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=edge-proxy
+Group=edge-proxy
+ExecStart=/opt/edgebox-network/xray run -config /etc/edgebox/xray-relay.json
+Restart=always
+RestartSec=10
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW
+AmbientCapabilities=CAP_NET_BIND_SERVICE CAP_NET_RAW
+MemoryMax=192M
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,17 @@
+[Unit]
+Description=EdgeBox isolated NetworkManager management access point
+After=NetworkManager.service edgebox-ap-isolation.service
+Requires=edgebox-ap-isolation.service
+Before=edge-ap-dhcp.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/nmcli connection up edgebox-management-ap
+ExecStop=/usr/bin/nmcli connection down edgebox-management-ap
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

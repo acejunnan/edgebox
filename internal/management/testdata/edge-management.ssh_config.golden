@@ -1,0 +1,21 @@
+Host edgebox-management-bastion
+    HostName bastion.lab.invalid
+    Port 2222
+    User edge-tunnel
+    IdentityFile /var/lib/edgebox/management/id_ed25519
+    IdentitiesOnly yes
+    IdentityAgent none
+    AddKeysToAgent no
+    UserKnownHostsFile /var/lib/edgebox/management/known_hosts
+    GlobalKnownHostsFile /dev/null
+    StrictHostKeyChecking yes
+    BatchMode yes
+    ExitOnForwardFailure yes
+    ServerAliveInterval 30
+    ServerAliveCountMax 3
+    ConnectTimeout 15
+    TCPKeepAlive yes
+    RequestTTY no
+    ForwardAgent no
+    ForwardX11 no
+    RemoteForward 127.0.0.1:22201 127.0.0.1:22

@@ -1,0 +1,30 @@
+[Unit]
+Description=EdgeBox isolated IPv4 data plane
+Wants=network.target
+After=network.target nftables.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/opt/edgebox-network/edge-dataplane --config /etc/edgebox/dataplane.json
+ExecStopPost=/opt/edgebox-network/edge-dataplane --config /etc/edgebox/dataplane.json --cleanup
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=45
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/lib/edgebox/dataplane /run
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+CapabilityBoundingSet=CAP_NET_ADMIN
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+MemoryMax=96M
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

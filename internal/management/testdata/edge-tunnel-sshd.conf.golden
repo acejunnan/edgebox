@@ -1,0 +1,18 @@
+# EdgeBox tunnel-establishment account. Operator accounts are separate.
+Match User edge-tunnel
+    AuthenticationMethods publickey
+    PubkeyAuthentication yes
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    GatewayPorts no
+    AllowTcpForwarding remote
+    AllowStreamLocalForwarding no
+    AllowAgentForwarding no
+    X11Forwarding no
+    PermitTTY no
+    PermitTunnel no
+    PermitOpen none
+    MaxSessions 0
+    ClientAliveInterval 30
+    ClientAliveCountMax 2
+    ForceCommand /bin/false

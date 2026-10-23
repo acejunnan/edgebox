@@ -1,0 +1,27 @@
+name: Checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - run: go test -race ./...
+      - run: go vet ./...
+      - run: python3 -m unittest discover -s deploy -p 'test_*.py' -v
+      - run: bash -n install.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test lab/console_ui.test.cjs
+      - name: Build Linux targets
+        run: |
+          for arch in amd64 arm64; do
+            for dir in cmd/*; do
+              CGO_ENABLED=0 GOOS=linux GOARCH=$arch go build -trimpath -o /tmp/edgebox-build/$arch/$(basename "$dir") ./$dir
+            done
+          done

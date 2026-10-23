@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodic HTTP time synchronization fallback for EdgeBox
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=30min
+RandomizedDelaySec=10s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,11 @@
+[Unit]
+Description=EdgeBox HTTP time synchronization fallback
+After=network.target
+Wants=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /opt/edgebox-network/timesync-fallback.py
+TimeoutSec=30
+StandardOutput=journal
+StandardError=journal

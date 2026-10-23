@@ -1,0 +1,22 @@
+# Local deployment material is deliberately outside the public source release.
+scratch/
+.orchestration/
+*.zip
+*.exe
+__pycache__/
+*.pyc
+*.key
+*.pem
+.env
+dist/
+rendered*/
+docs/audits/
+docs/BASTION_MIGRATION.md
+docs/N1_OS_OTA.md
+docs/TRAVEL_GUIDE.zh-CN.md
+docs/MANAGEMENT_RUNBOOK.md
+docs/EGRESS_RUNBOOK.zh-CN.md
+docs/CONSOLE_GUIDE.zh-CN.md
+docs/OPUS_HANDOFF.zh-CN.md
+docs/PHASE_2C.md
+manifest.json

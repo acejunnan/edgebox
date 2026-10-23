@@ -1,0 +1,35 @@
+[Unit]
+Description=EdgeBox outbound reverse SSH management tunnel
+Wants=network.target
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=edge-management
+Group=edge-management
+UMask=0077
+ExecStart=/usr/bin/ssh -N -T -F /etc/edgebox/edge-management.ssh_config edgebox-management-bastion
+Restart=always
+RestartSec=10s
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadOnlyPaths=/etc/edgebox/edge-management.ssh_config /var/lib/edgebox/management/id_ed25519 /var/lib/edgebox/management/known_hosts
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

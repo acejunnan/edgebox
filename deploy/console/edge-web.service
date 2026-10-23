@@ -1,0 +1,32 @@
+[Unit]
+Description=EdgeBox offline local management console
+After=network.target edge-updater.service edgebox-ap-isolation.service
+Wants=edge-updater.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=edge-web
+Group=edge-web
+ExecStart=/opt/edgebox/current/bin/edge-web serve
+Restart=always
+RestartSec=5s
+UMask=0077
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET
+CapabilityBoundingSet=
+AmbientCapabilities=
+ReadWritePaths=/var/lib/edgebox/web
+MemoryMax=192M
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

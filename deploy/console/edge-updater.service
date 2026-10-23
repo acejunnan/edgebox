@@ -1,0 +1,26 @@
+[Unit]
+Description=EdgeBox signed application updater and scoped management operations
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=root
+Group=edge-web
+ExecStart=/usr/local/libexec/edge-updater
+Restart=always
+RestartSec=5s
+UMask=0077
+RuntimeDirectory=edgebox-updater
+RuntimeDirectoryMode=0750
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/opt/edgebox /var/lib/edgebox/ap /var/lib/edgebox/updates /etc/NetworkManager/system-connections /etc/systemd/system
+MemoryMax=384M
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

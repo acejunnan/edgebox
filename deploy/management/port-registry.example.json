@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "allowed_port_range": {
+    "start": 22000,
+    "end": 22999
+  },
+  "reserved_ports": [
+    22000,
+    22999
+  ],
+  "assignments": [
+    {
+      "device_id": "lab-device-a",
+      "port": 22201
+    },
+    {
+      "device_id": "lab-device-b",
+      "port": 22202
+    }
+  ]
+}

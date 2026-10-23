@@ -1,0 +1,12 @@
+[Unit]
+Description=EdgeBox management WLAN forwarding isolation
+After=local-fs.target nftables.service
+Before=NetworkManager.service edge-ap-dhcp.service edge-web.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/libexec/edgebox-ap-isolation
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
